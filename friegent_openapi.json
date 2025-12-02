@@ -1,0 +1,124 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Friegent Product Recommender",
+    "version": "1.0.0",
+    "description": "HTTP API for Friegent – personal AI shopping agent that returns structured product recommendations."
+  },
+  "servers": [
+    {
+      "url": "https://friegent.com/friegent-api"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "service": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recommend": {
+      "post": {
+        "operationId": "recommendProducts",
+        "summary": "Get product recommendations from Friegent",
+        "description": "Given a user profile and free-text product query, returns structured product recommendations.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recommendations generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Experience": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Product name" },
+          "notes": { "type": "string", "description": "Short notes about the experience" },
+          "rating": { "type": "integer", "description": "Rating 1-5", "minimum": 1, "maximum": 5 }
+        },
+        "required": ["name", "notes", "rating"]
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "personality": { "type": "string" },
+          "values": { "type": "string" },
+          "experiences": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Experience" }
+          }
+        },
+        "required": ["name", "personality", "values"]
+      },
+      "RecommendRequest": {
+        "type": "object",
+        "properties": {
+          "profile": { "$ref": "#/components/schemas/Profile" },
+          "query": {
+            "type": "string",
+            "description": "Natural language query describing what product the user is looking for"
+          }
+        },
+        "required": ["profile", "query"]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "short_description": { "type": "string" },
+          "why_match": { "type": "string" },
+          "estimated_price_range": { "type": "string" }
+        },
+        "required": ["name", "short_description", "why_match"]
+      },
+      "RecommendResponse": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Product" }
+          },
+          "summary_for_user": { "type": "string" }
+        },
+        "required": ["products", "summary_for_user"]
+      }
+    }
+  }
+}
